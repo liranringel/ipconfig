@@ -1,0 +1,13 @@
+[package]
+name = "ipconfig"
+version = "0.1.0"
+authors = ["Liran Ringel <liranringel@gmail.com>"]
+
+[dependencies]
+winapi = "^0.2.8"
+error-chain = "0.8"
+widestring = "^0.2.2"
+socket2 = "^0.2.2"
+
+[build-dependencies]
+bindgen = "0.30"
