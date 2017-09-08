@@ -9,6 +9,13 @@ install:
   - rustup-init.exe -y --default-host %TARGET%
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
   - set PATH=%PATH%;C:\Users\appveyor\.rustup\toolchains\stable-%TARGET%\bin
+  # Install LLVM for MSVC
+  - appveyor-retry appveyor DownloadFile http://releases.llvm.org/4.0.0/LLVM-4.0.0-win64.exe -FileName llvm-installer.exe
+  - 7z x llvm-installer.exe -oc:\llvm-binary
+  - set PATH=C:\llvm-binary\bin;%PATH%
+  - where clang
+  - clang --version
+
   - rustc -V
   - cargo -V
 
