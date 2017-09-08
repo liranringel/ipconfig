@@ -16,4 +16,4 @@ for adapter in ipconfig::get_adapters()? {
     println!("Ip addresses: {:#?}", adapter.ip_addresses());
     println!("Dns servers: {:#?}", adapter.dns_servers());
 }
-//! ```
+```
