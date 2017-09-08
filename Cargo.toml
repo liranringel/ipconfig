@@ -2,6 +2,16 @@
 name = "ipconfig"
 version = "0.1.0"
 authors = ["Liran Ringel <liranringel@gmail.com>"]
+description = "Get network adapters information for windows."
+license = "MIT/Apache-2.0"
+keywords = ["ipconfig", "network", "adapter", "interface", "windows"]
+repository = "https://github.com/liranringel/ipconfig"
+homepage = "https://github.com/liranringel/ipconfig"
+documentation = "https://docs.rs/ipconfig"
+readme = "README.md"
+
+[badges]
+appveyor = { repository = "liranringel/ipconfig" }
 
 [dependencies]
 winapi = "^0.2.8"
