@@ -1,7 +1,9 @@
 environment:
   matrix:
   - TARGET: x86_64-pc-windows-msvc
+    BITS: 64
   - TARGET: i686-pc-windows-msvc
+    BITS: 32
 install:
   # Install Rust
   - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
@@ -9,8 +11,11 @@ install:
   - rustup-init.exe -y --default-host %TARGET%
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
   - set PATH=%PATH%;C:\Users\appveyor\.rustup\toolchains\stable-%TARGET%\bin
+  # Install LLVM for MSVC
+  - appveyor-retry appveyor DownloadFile http://releases.llvm.org/4.0.0/LLVM-4.0.0-win%BITS%.exe -FileName llvm-installer.exe
+  - 7z x llvm-installer.exe -oc:\llvm-binary
+  - set PATH=C:\llvm-binary\bin;%PATH%
   - where clang
-  - where libclang.dll
   - clang --version
 
   - rustc -V
