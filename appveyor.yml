@@ -11,7 +11,8 @@ install:
   - set PATH=%PATH%;C:\Users\appveyor\.rustup\toolchains\stable-%TARGET%\bin
   # Install LLVM for MSVC
   - if %TARGET%==i686-pc-windows-msvc appveyor-retry appveyor DownloadFile http://releases.llvm.org/4.0.0/LLVM-4.0.0-win32.exe -FileName llvm-installer.exe
-  - if %TARGET%==i686-pc-windows-msvc 7z x llvm-installer.exe -o"C:\Program Files (x86)\LLVM"
+  - if %TARGET%==i686-pc-windows-msvc 7z x llvm-installer.exe -o"C:\Program Files (x86)\LLVM" -aoa
+  - if %TARGET%==i686-pc-windows-msvc 7z x llvm-installer.exe -o"C:\Program Files\LLVM" -aoa
   - where clang
   - clang --version
 
