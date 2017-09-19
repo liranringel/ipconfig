@@ -1,7 +1,7 @@
 environment:
   matrix:
   - TARGET: x86_64-pc-windows-msvc
-  - TARGET: i686-pc-windows-msvc
+  #- TARGET: i686-pc-windows-msvc  # Skip i686 until https://github.com/rust-lang-nursery/rust-bindgen/issues/541 is resolved
 install:
   # Install Rust
   - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
