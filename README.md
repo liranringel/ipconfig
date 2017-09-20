@@ -1,6 +1,6 @@
 # Ipconfig
 
-**Get network adapters information for windows.**
+**Get network adapters information and network configuration for windows.**
 
 [![Build status](https://ci.appveyor.com/api/projects/status/tiwjo6q4eete0nmh/branch/master?svg=true)](https://ci.appveyor.com/project/liran-ringel/ipconfig/branch/master)
 [![Crates.io](https://img.shields.io/crates/v/ipconfig.svg)](https://crates.io/crates/ipconfig)
