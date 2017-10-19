@@ -26,6 +26,7 @@ pub struct Adapter {
     adapter_name: String,
     ip_addresses: Vec<IpAddr>,
     dns_servers: Vec<IpAddr>,
+    description: String,
     friendly_name: String,
 }
 
@@ -42,7 +43,11 @@ impl Adapter {
     pub fn dns_servers(&self) -> &Vec<IpAddr> {
         &self.dns_servers
     }
-    /// Get the adapter's friendly_name
+    /// Get the adapter's description
+    pub fn description(&self) -> &String {
+        &self.description
+    }
+    /// Get the adapter's friendly name
     pub fn friendly_name(&self) -> &String {
         &self.friendly_name
     }
@@ -84,11 +89,13 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
     let dns_servers = get_dns_servers(adapter_addresses.FirstDnsServerAddress)?;
     let unicast_addresses = get_unicast_addresses(adapter_addresses.FirstUnicastAddress)?;
 
+    let description = WideCString::from_ptr_str(adapter_addresses.Description).to_string()?;
     let friendly_name = WideCString::from_ptr_str(adapter_addresses.FriendlyName).to_string()?;
     Ok(Adapter {
         adapter_name: adapter_name,
         ip_addresses: unicast_addresses,
         dns_servers: dns_servers,
+        description: description,
         friendly_name: friendly_name,
     })
 }
