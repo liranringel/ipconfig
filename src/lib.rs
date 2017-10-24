@@ -17,6 +17,9 @@
 //! # }
 //! ```
 
+#![cfg(windows)]
+#![doc(html_root_url = "https://docs.rs/ipconfig/0.1.2/x86_64-pc-windows-gnu/ipconfig/")]
+
 #[macro_use]
 extern crate error_chain;
 extern crate winapi;
