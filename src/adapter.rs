@@ -7,17 +7,7 @@ use winapi::{AF_UNSPEC, ERROR_SUCCESS, ERROR_BUFFER_OVERFLOW};
 use socket2;
 use error::*;
 
-
-// Put all bindings in a private module so auto-generated public types won't be exposed
-#[allow(non_upper_case_globals)]
-#[allow(non_camel_case_types)]
-#[allow(non_snake_case)]
-#[allow(dead_code)]
-mod bindings {
-    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
-}
-
-use self::bindings::*;
+use bindings::*;
 
 
 /// Represent an adapter.

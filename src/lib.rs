@@ -18,7 +18,7 @@
 //! ```
 
 #![cfg(windows)]
-#![doc(html_root_url = "https://docs.rs/ipconfig/0.1.3/x86_64-pc-windows-gnu/ipconfig/")]
+#![doc(html_root_url = "https://docs.rs/ipconfig/0.1.4/x86_64-pc-windows-gnu/ipconfig/")]
 
 #[macro_use]
 extern crate error_chain;
@@ -31,5 +31,6 @@ extern crate winreg;
 pub mod error;
 pub mod computer;
 mod adapter;
+mod bindings;
 
 pub use adapter::{get_adapters, Adapter};
