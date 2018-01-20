@@ -18,7 +18,7 @@
 //! ```
 
 #![cfg(windows)]
-#![doc(html_root_url = "https://docs.rs/ipconfig/0.1.4/x86_64-pc-windows-gnu/ipconfig/")]
+#![doc(html_root_url = "https://docs.rs/ipconfig/0.1.5/x86_64-pc-windows-msvc/ipconfig/")]
 
 #[macro_use]
 extern crate error_chain;
