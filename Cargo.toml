@@ -14,8 +14,8 @@ readme = "README.md"
 appveyor = { repository = "liranringel/ipconfig" }
 
 [target.'cfg(windows)'.dependencies]
-winapi = "^0.2.8"
+winapi = "^0.3.4"
 error-chain = "0.8"
 widestring = "^0.2.2"
-socket2 = "^0.2.2"
-winreg = "^0.4.0"
+socket2 = "^0.3.1"
+winreg = "^0.5.0"
