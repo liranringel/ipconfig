@@ -18,6 +18,7 @@ pub struct Adapter {
     dns_servers: Vec<IpAddr>,
     description: String,
     friendly_name: String,
+    physical_address: Option<Vec<u8>>,
 }
 
 impl Adapter {
@@ -40,6 +41,10 @@ impl Adapter {
     /// Get the adapter's friendly name
     pub fn friendly_name(&self) -> &String {
         &self.friendly_name
+    }
+    /// Get the adapter's physical (MAC) address
+    pub fn physical_address(&self) -> &Option<Vec<u8>> {
+        &self.physical_address
     }
 }
 
@@ -81,12 +86,18 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
 
     let description = WideCString::from_ptr_str(adapter_addresses.Description).to_string()?;
     let friendly_name = WideCString::from_ptr_str(adapter_addresses.FriendlyName).to_string()?;
+    let physical_address = if adapter_addresses.PhysicalAddressLength == 0 {
+        None
+    } else {
+        Some(adapter_addresses.PhysicalAddress[..adapter_addresses.PhysicalAddressLength as usize].to_vec())
+    };
     Ok(Adapter {
         adapter_name: adapter_name,
         ip_addresses: unicast_addresses,
         dns_servers: dns_servers,
         description: description,
         friendly_name: friendly_name,
+        physical_address: physical_address,
     })
 }
 
