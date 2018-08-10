@@ -49,9 +49,13 @@ pub fn get_search_list() -> Result<Vec<String>> {
     let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
     let params_key = hklm.open_subkey_with_flags(TCPIP_PARAMETERS_KEY_PATH,
                                                  KEY_READ)?;
-    let search_list: String = params_key.get_value("SearchList")?;
-    let search_list: Vec<String> = search_list.split(',').map(|s| s.to_string()).collect();
-    Ok(search_list)
+    let search_list: ::std::io::Result<String> = params_key.get_value("SearchList");
+    if let Ok(search_list) = search_list {
+        let search_list: Vec<String> = search_list.split(',').map(|s| s.to_string()).collect();
+        Ok(search_list)
+    } else {
+        Ok(vec![])
+    }
 }
 
 /// Returns the computer domain name (if any).
