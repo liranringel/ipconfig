@@ -1,14 +1,9 @@
-error_chain! {
-    foreign_links {
-        Utf8(::std::str::Utf8Error);
-        FromUtf16(::std::string::FromUtf16Error);
-        Io(::std::io::Error);
-    }
+use failure::Error;
 
-    errors {
-        Os(error: u32) {
-            description("Win32 error occurred")
-            display("Win32 error occurred: {}", error)
-        }
-    }
+#[derive(Debug, Fail)]
+pub enum ErrorKind {
+    #[fail(display = "Win32 error occurred: {}", _0)]
+    Os(u32),
 }
+
+pub type Result<T> = ::std::result::Result<T, Error>;

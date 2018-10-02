@@ -21,7 +21,7 @@
 #![doc(html_root_url = "https://docs.rs/ipconfig/0.1.7/x86_64-pc-windows-msvc/ipconfig/")]
 
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 extern crate winapi;
 extern crate widestring;
 extern crate socket2;
