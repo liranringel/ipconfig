@@ -12,7 +12,7 @@ use bindings::*;
 
 /// Represent an operational status of the adapter
 /// See IP_ADAPTER_ADDRESSES docs for more details
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OperStatus {
     IfOperStatusUp = 1,
     IfOperStatusDown = 2,
@@ -31,7 +31,7 @@ pub enum OperStatus {
 /// `IfType::Unsupported` is used. `IfType::Other`
 /// is different from `IfType::Unsupported`, as the former
 /// one is defined by the IANA itself.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum IfType {
     Other = 1,
     EthernetCsmacd = 6,

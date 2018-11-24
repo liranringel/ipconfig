@@ -33,4 +33,4 @@ pub mod computer;
 mod adapter;
 mod bindings;
 
-pub use adapter::{get_adapters, Adapter};
+pub use adapter::{get_adapters, Adapter, OperStatus, IfType};
