@@ -2,11 +2,11 @@ use std;
 use std::ffi::CStr;
 use std::net::IpAddr;
 
-use widestring::WideCString;
-use winapi::shared::winerror::{ERROR_SUCCESS, ERROR_BUFFER_OVERFLOW};
-use winapi::shared::ws2def::AF_UNSPEC;
-use socket2;
 use error::*;
+use socket2;
+use widestring::WideCString;
+use winapi::shared::winerror::ERROR_SUCCESS;
+use winapi::shared::ws2def::AF_UNSPEC;
 
 use bindings::*;
 
@@ -55,6 +55,8 @@ pub enum IfType {
 pub struct Adapter {
     adapter_name: String,
     ip_addresses: Vec<IpAddr>,
+    prefixes: Vec<(IpAddr, u32)>,
+    gateways: Vec<IpAddr>,
     dns_servers: Vec<IpAddr>,
     description: String,
     friendly_name: String,
@@ -73,6 +75,14 @@ impl Adapter {
     /// Get the adapter's ip addresses (unicast ip addresses)
     pub fn ip_addresses(&self) -> &Vec<IpAddr> {
         &self.ip_addresses
+    }
+    /// Get the adapter's addresses and prefixes
+    pub fn prefixes(&self) -> &Vec<(IpAddr, u32)> {
+        &self.prefixes
+    }
+    /// Get the adapter's gateways
+    pub fn gateways(&self) -> &Vec<IpAddr> {
+        &self.gateways
     }
     /// Get the adapter's dns servers (the preferred dns server is first)
     pub fn dns_servers(&self) -> &Vec<IpAddr> {
@@ -115,18 +125,20 @@ impl Adapter {
 /// Get all the network adapters on this machine.
 pub fn get_adapters() -> Result<Vec<Adapter>> {
     unsafe {
-        let mut buf_len: ULONG = 0;
-        let result = GetAdaptersAddresses(AF_UNSPEC as u32, 0, std::ptr::null_mut(), std::ptr::null_mut(), &mut buf_len as *mut ULONG);
-
-        assert!(result != ERROR_SUCCESS);
-
-        if result != ERROR_BUFFER_OVERFLOW {
-            bail!(ErrorKind::Os(result));
-        }
+        // Preallocate 32K per Microsoft recommendation, see Remarks section
+        // https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getadaptersaddresses
+        let mut buf_len: ULONG = 32768;
 
         let mut adapters_addresses_buffer: Vec<u8> = vec![0; buf_len as usize];
-        let mut adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES = std::mem::transmute(adapters_addresses_buffer.as_mut_ptr());
-        let result = GetAdaptersAddresses(AF_UNSPEC as u32, 0, std::ptr::null_mut(), adapter_addresses_ptr, &mut buf_len as *mut ULONG);
+        let mut adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES =
+            std::mem::transmute(adapters_addresses_buffer.as_mut_ptr());
+        let result = GetAdaptersAddresses(
+            AF_UNSPEC as u32,
+            0x0080 | 0x0010, //GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_INCLUDE_PREFIX,
+            std::ptr::null_mut(),
+            adapter_addresses_ptr,
+            &mut buf_len as *mut ULONG,
+        );
 
         if result != ERROR_SUCCESS {
             bail!(ErrorKind::Os(result));
@@ -144,21 +156,27 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
 
 unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Adapter> {
     let adapter_addresses = &*adapter_addresses_ptr;
-    let adapter_name = CStr::from_ptr(adapter_addresses.AdapterName).to_str()?.to_owned();
+    let adapter_name = CStr::from_ptr(adapter_addresses.AdapterName)
+        .to_str()?
+        .to_owned();
     let dns_servers = get_dns_servers(adapter_addresses.FirstDnsServerAddress)?;
+    let gateways = get_gateways(adapter_addresses.FirstGatewayAddress)?;
+    let prefixes = get_prefixes(adapter_addresses.FirstPrefix)?;
     let unicast_addresses = get_unicast_addresses(adapter_addresses.FirstUnicastAddress)?;
     let receive_link_speed: u64 = adapter_addresses.ReceiveLinkSpeed;
     let transmit_link_speed: u64 = adapter_addresses.TransmitLinkSpeed;
     let oper_status = match adapter_addresses.OperStatus {
-            1 => OperStatus::IfOperStatusUp,
-            2 => OperStatus::IfOperStatusDown,
-            3 => OperStatus::IfOperStatusTesting,
-            4 => OperStatus::IfOperStatusUnknown,
-            5 => OperStatus::IfOperStatusDormant,
-            6 => OperStatus::IfOperStatusNotPresent,
-            7 => OperStatus::IfOperStatusLowerLayerDown,
-            v => { panic!("unexpected OperStatus value: {}", v); }
-        };
+        1 => OperStatus::IfOperStatusUp,
+        2 => OperStatus::IfOperStatusDown,
+        3 => OperStatus::IfOperStatusTesting,
+        4 => OperStatus::IfOperStatusUnknown,
+        5 => OperStatus::IfOperStatusDormant,
+        6 => OperStatus::IfOperStatusNotPresent,
+        7 => OperStatus::IfOperStatusLowerLayerDown,
+        v => {
+            panic!("unexpected OperStatus value: {}", v);
+        }
+    };
     let if_type = match adapter_addresses.IfType {
         1 => IfType::Other,
         6 => IfType::EthernetCsmacd,
@@ -177,32 +195,43 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
     let physical_address = if adapter_addresses.PhysicalAddressLength == 0 {
         None
     } else {
-        Some(adapter_addresses.PhysicalAddress[..adapter_addresses.PhysicalAddressLength as usize].to_vec())
+        Some(
+            adapter_addresses.PhysicalAddress[..adapter_addresses.PhysicalAddressLength as usize]
+                .to_vec(),
+        )
     };
     Ok(Adapter {
-        adapter_name: adapter_name,
+        adapter_name,
         ip_addresses: unicast_addresses,
-        dns_servers: dns_servers,
-        description: description,
-        friendly_name: friendly_name,
-        physical_address: physical_address,
-        receive_link_speed: receive_link_speed,
-        transmit_link_speed: transmit_link_speed,
-        oper_status: oper_status,
-        if_type: if_type,
+        prefixes,
+        gateways,
+        dns_servers,
+        description,
+        friendly_name,
+        physical_address,
+        receive_link_speed,
+        transmit_link_speed,
+        oper_status,
+        if_type,
     })
 }
 
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
-    let sockaddr = socket2::SockAddr::from_raw_parts(std::mem::transmute(socket_address.lpSockaddr), socket_address.iSockaddrLength);
+    let sockaddr = socket2::SockAddr::from_raw_parts(
+        std::mem::transmute(socket_address.lpSockaddr),
+        socket_address.iSockaddrLength,
+    );
 
     // Could be either ipv4 or ipv6
-    sockaddr.as_inet()
+    sockaddr
+        .as_inet()
         .map(|s| IpAddr::V4(*s.ip()))
         .unwrap_or_else(|| IpAddr::V6(*sockaddr.as_inet6().unwrap().ip()))
 }
 
-unsafe fn get_dns_servers(mut dns_server_ptr: PIP_ADAPTER_DNS_SERVER_ADDRESS_XP) -> Result<Vec<IpAddr>> {
+unsafe fn get_dns_servers(
+    mut dns_server_ptr: PIP_ADAPTER_DNS_SERVER_ADDRESS_XP,
+) -> Result<Vec<IpAddr>> {
     let mut dns_servers = vec![];
 
     while dns_server_ptr != std::ptr::null_mut() {
@@ -216,7 +245,23 @@ unsafe fn get_dns_servers(mut dns_server_ptr: PIP_ADAPTER_DNS_SERVER_ADDRESS_XP)
     Ok(dns_servers)
 }
 
-unsafe fn get_unicast_addresses(mut unicast_addresses_ptr: PIP_ADAPTER_UNICAST_ADDRESS_LH) -> Result<Vec<IpAddr>> {
+unsafe fn get_gateways(mut gateway_ptr: PIP_ADAPTER_GATEWAY_ADDRESS_LH) -> Result<Vec<IpAddr>> {
+    let mut gateways = vec![];
+
+    while gateway_ptr != std::ptr::null_mut() {
+        let gateway = &*gateway_ptr;
+        let ipaddr = socket_address_to_ipaddr(&gateway.Address);
+        gateways.push(ipaddr);
+
+        gateway_ptr = gateway.Next;
+    }
+
+    Ok(gateways)
+}
+
+unsafe fn get_unicast_addresses(
+    mut unicast_addresses_ptr: PIP_ADAPTER_UNICAST_ADDRESS_LH,
+) -> Result<Vec<IpAddr>> {
     let mut unicast_addresses = vec![];
 
     while unicast_addresses_ptr != std::ptr::null_mut() {
@@ -228,4 +273,18 @@ unsafe fn get_unicast_addresses(mut unicast_addresses_ptr: PIP_ADAPTER_UNICAST_A
     }
 
     Ok(unicast_addresses)
+}
+
+unsafe fn get_prefixes(mut prefixes_ptr: PIP_ADAPTER_PREFIX_XP) -> Result<Vec<(IpAddr, u32)>> {
+    let mut prefixes = vec![];
+
+    while prefixes_ptr != std::ptr::null_mut() {
+        let prefix = &*prefixes_ptr;
+        let ipaddr = socket_address_to_ipaddr(&prefix.Address);
+        prefixes.push((ipaddr, prefix.PrefixLength));
+
+        prefixes_ptr = prefix.Next;
+    }
+
+    Ok(prefixes)
 }
