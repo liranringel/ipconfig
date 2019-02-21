@@ -1,3 +1,5 @@
+#![allow(clippy::cast_ptr_alignment)]
+
 use std;
 use std::ffi::CStr;
 use std::net::IpAddr;
@@ -7,6 +9,7 @@ use socket2;
 use widestring::WideCString;
 use winapi::shared::winerror::ERROR_SUCCESS;
 use winapi::shared::ws2def::AF_UNSPEC;
+use winapi::shared::ws2def::SOCKADDR;
 
 use bindings::*;
 
@@ -76,7 +79,7 @@ impl Adapter {
     pub fn ip_addresses(&self) -> &Vec<IpAddr> {
         &self.ip_addresses
     }
-    /// Get the adapter's addresses and prefixes
+    /// Get the adapter's prefixes
     pub fn prefixes(&self) -> &Vec<(IpAddr, u32)> {
         &self.prefixes
     }
@@ -131,7 +134,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
 
         let mut adapters_addresses_buffer: Vec<u8> = vec![0; buf_len as usize];
         let mut adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES =
-            std::mem::transmute(adapters_addresses_buffer.as_mut_ptr());
+            adapters_addresses_buffer.as_mut_ptr() as *mut IP_ADAPTER_ADDRESSES_LH;
         let result = GetAdaptersAddresses(
             AF_UNSPEC as u32,
             0x0080 | 0x0010, //GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_INCLUDE_PREFIX,
@@ -145,7 +148,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         }
 
         let mut adapters = vec![];
-        while adapter_addresses_ptr != std::ptr::null_mut() {
+        while !adapter_addresses_ptr.is_null() {
             adapters.push(get_adapter(adapter_addresses_ptr)?);
             adapter_addresses_ptr = (*adapter_addresses_ptr).Next;
         }
@@ -218,7 +221,7 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
 
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
     let sockaddr = socket2::SockAddr::from_raw_parts(
-        std::mem::transmute(socket_address.lpSockaddr),
+        socket_address.lpSockaddr as *const SOCKADDR,
         socket_address.iSockaddrLength,
     );
 
@@ -234,7 +237,7 @@ unsafe fn get_dns_servers(
 ) -> Result<Vec<IpAddr>> {
     let mut dns_servers = vec![];
 
-    while dns_server_ptr != std::ptr::null_mut() {
+    while !dns_server_ptr.is_null() {
         let dns_server = &*dns_server_ptr;
         let ipaddr = socket_address_to_ipaddr(&dns_server.Address);
         dns_servers.push(ipaddr);
@@ -248,7 +251,7 @@ unsafe fn get_dns_servers(
 unsafe fn get_gateways(mut gateway_ptr: PIP_ADAPTER_GATEWAY_ADDRESS_LH) -> Result<Vec<IpAddr>> {
     let mut gateways = vec![];
 
-    while gateway_ptr != std::ptr::null_mut() {
+    while !gateway_ptr.is_null() {
         let gateway = &*gateway_ptr;
         let ipaddr = socket_address_to_ipaddr(&gateway.Address);
         gateways.push(ipaddr);
@@ -264,7 +267,7 @@ unsafe fn get_unicast_addresses(
 ) -> Result<Vec<IpAddr>> {
     let mut unicast_addresses = vec![];
 
-    while unicast_addresses_ptr != std::ptr::null_mut() {
+    while !unicast_addresses_ptr.is_null() {
         let unicast_address = &*unicast_addresses_ptr;
         let ipaddr = socket_address_to_ipaddr(&unicast_address.Address);
         unicast_addresses.push(ipaddr);
@@ -278,7 +281,7 @@ unsafe fn get_unicast_addresses(
 unsafe fn get_prefixes(mut prefixes_ptr: PIP_ADAPTER_PREFIX_XP) -> Result<Vec<(IpAddr, u32)>> {
     let mut prefixes = vec![];
 
-    while prefixes_ptr != std::ptr::null_mut() {
+    while !prefixes_ptr.is_null() {
         let prefix = &*prefixes_ptr;
         let ipaddr = socket_address_to_ipaddr(&prefix.Address);
         prefixes.push((ipaddr, prefix.PrefixLength));

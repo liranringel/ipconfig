@@ -3,6 +3,8 @@
     bindgen.exe --whitelist-function=GetAdaptersAddresses wrapper.h -- --target=x86_64-pc-windows-msvc
 */
 
+#![allow(clippy::all)]
+
 pub type wchar_t = ::std::os::raw::c_ushort;
 pub type ULONG = ::std::os::raw::c_ulong;
 pub type PULONG = *mut ULONG;
