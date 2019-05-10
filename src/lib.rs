@@ -18,7 +18,7 @@
 //! ```
 
 #![cfg(windows)]
-#![doc(html_root_url = "https://docs.rs/ipconfig/0.1.9/x86_64-pc-windows-msvc/ipconfig/")]
+#![doc(html_root_url = "https://docs.rs/ipconfig/0.2/x86_64-pc-windows-msvc/ipconfig/")]
 
 
 pub mod error;
