@@ -88,7 +88,7 @@ impl Adapter {
     }
     /// Get the adapter's physical (MAC) address
     pub fn physical_address(&self) -> Option<&[u8]> {
-        self.physical_address.as_ref().map(|v| v.as_slice())
+        self.physical_address.as_ref().map(std::vec::Vec::as_slice)
     }
 
     /// Get the adapter Recieve Link Speed (bits per second)
@@ -125,7 +125,8 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         }
 
         let mut adapters_addresses_buffer: Vec<u8> = vec![0; buf_len as usize];
-        let mut adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES = std::mem::transmute(adapters_addresses_buffer.as_mut_ptr());
+        #[allow(clippy::cast_ptr_alignment)]
+        let mut adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES = adapters_addresses_buffer.as_mut_ptr() as *mut _;
         let result = GetAdaptersAddresses(AF_UNSPEC as u32, 0, std::ptr::null_mut(), adapter_addresses_ptr, &mut buf_len as *mut ULONG);
 
         if result != ERROR_SUCCESS {
@@ -133,7 +134,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         }
 
         let mut adapters = vec![];
-        while adapter_addresses_ptr != std::ptr::null_mut() {
+        while !adapter_addresses_ptr.is_null() {
             adapters.push(get_adapter(adapter_addresses_ptr)?);
             adapter_addresses_ptr = (*adapter_addresses_ptr).Next;
         }
@@ -180,21 +181,21 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
         Some(adapter_addresses.PhysicalAddress[..adapter_addresses.PhysicalAddressLength as usize].to_vec())
     };
     Ok(Adapter {
-        adapter_name: adapter_name,
+        adapter_name,
         ip_addresses: unicast_addresses,
-        dns_servers: dns_servers,
-        description: description,
-        friendly_name: friendly_name,
-        physical_address: physical_address,
-        receive_link_speed: receive_link_speed,
-        transmit_link_speed: transmit_link_speed,
-        oper_status: oper_status,
-        if_type: if_type,
+        dns_servers,
+        description,
+        friendly_name,
+        physical_address,
+        receive_link_speed,
+        transmit_link_speed,
+        oper_status,
+        if_type,
     })
 }
 
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
-    let sockaddr = socket2::SockAddr::from_raw_parts(std::mem::transmute(socket_address.lpSockaddr), socket_address.iSockaddrLength);
+    let sockaddr = socket2::SockAddr::from_raw_parts(socket_address.lpSockaddr as _, socket_address.iSockaddrLength);
 
     // Could be either ipv4 or ipv6
     sockaddr.as_inet()
@@ -205,7 +206,7 @@ unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
 unsafe fn get_dns_servers(mut dns_server_ptr: PIP_ADAPTER_DNS_SERVER_ADDRESS_XP) -> Result<Vec<IpAddr>> {
     let mut dns_servers = vec![];
 
-    while dns_server_ptr != std::ptr::null_mut() {
+    while !dns_server_ptr.is_null() {
         let dns_server = &*dns_server_ptr;
         let ipaddr = socket_address_to_ipaddr(&dns_server.Address);
         dns_servers.push(ipaddr);
@@ -219,7 +220,7 @@ unsafe fn get_dns_servers(mut dns_server_ptr: PIP_ADAPTER_DNS_SERVER_ADDRESS_XP)
 unsafe fn get_unicast_addresses(mut unicast_addresses_ptr: PIP_ADAPTER_UNICAST_ADDRESS_LH) -> Result<Vec<IpAddr>> {
     let mut unicast_addresses = vec![];
 
-    while unicast_addresses_ptr != std::ptr::null_mut() {
+    while !unicast_addresses_ptr.is_null() {
         let unicast_address = &*unicast_addresses_ptr;
         let ipaddr = socket_address_to_ipaddr(&unicast_address.Address);
         unicast_addresses.push(ipaddr);
