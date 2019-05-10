@@ -16,7 +16,6 @@ appveyor = { repository = "liranringel/ipconfig" }
 
 [target.'cfg(windows)'.dependencies]
 winapi = "^0.3.4"
-error-chain = "0.12"
 widestring = "^0.4"
 socket2 = "^0.3.1"
 winreg = "^0.6.0"

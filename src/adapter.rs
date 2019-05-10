@@ -121,7 +121,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         assert!(result != ERROR_SUCCESS);
 
         if result != ERROR_BUFFER_OVERFLOW {
-            bail!(ErrorKind::Os(result));
+            return Err(Error { kind: ErrorKind::Os(result) });
         }
 
         let mut adapters_addresses_buffer: Vec<u8> = vec![0; buf_len as usize];
@@ -130,7 +130,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         let result = GetAdaptersAddresses(AF_UNSPEC as u32, 0, std::ptr::null_mut(), adapter_addresses_ptr, &mut buf_len as *mut ULONG);
 
         if result != ERROR_SUCCESS {
-            bail!(ErrorKind::Os(result));
+            return Err(Error { kind: ErrorKind::Os(result)});
         }
 
         let mut adapters = vec![];
