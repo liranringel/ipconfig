@@ -20,9 +20,6 @@
 #![cfg(windows)]
 #![doc(html_root_url = "https://docs.rs/ipconfig/0.1.9/x86_64-pc-windows-msvc/ipconfig/")]
 
-#[macro_use]
-extern crate error_chain;
-
 
 pub mod error;
 pub mod computer;
