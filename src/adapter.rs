@@ -67,28 +67,28 @@ pub struct Adapter {
 
 impl Adapter {
     /// Get the adapter's name
-    pub fn adapter_name(&self) -> &String {
+    pub fn adapter_name(&self) -> &str {
         &self.adapter_name
     }
     /// Get the adapter's ip addresses (unicast ip addresses)
-    pub fn ip_addresses(&self) -> &Vec<IpAddr> {
+    pub fn ip_addresses(&self) -> &[IpAddr] {
         &self.ip_addresses
     }
     /// Get the adapter's dns servers (the preferred dns server is first)
-    pub fn dns_servers(&self) -> &Vec<IpAddr> {
+    pub fn dns_servers(&self) -> &[IpAddr] {
         &self.dns_servers
     }
     /// Get the adapter's description
-    pub fn description(&self) -> &String {
+    pub fn description(&self) -> &str {
         &self.description
     }
     /// Get the adapter's friendly name
-    pub fn friendly_name(&self) -> &String {
+    pub fn friendly_name(&self) -> &str {
         &self.friendly_name
     }
     /// Get the adapter's physical (MAC) address
-    pub fn physical_address(&self) -> &Option<Vec<u8>> {
-        &self.physical_address
+    pub fn physical_address(&self) -> Option<&[u8]> {
+        self.physical_address.as_ref().map(|v| v.as_slice())
     }
 
     /// Get the adapter Recieve Link Speed (bits per second)
