@@ -51,7 +51,7 @@ pub fn get_search_list() -> Result<Vec<String>> {
                                                  KEY_READ)?;
     let search_list: ::std::io::Result<String> = params_key.get_value("SearchList");
     if let Ok(search_list) = search_list {
-        let search_list: Vec<String> = search_list.split(',').map(|s| s.to_string()).collect();
+        let search_list: Vec<String> = search_list.split(',').map(std::string::ToString::to_string).collect();
         Ok(search_list)
     } else {
         Ok(vec![])
