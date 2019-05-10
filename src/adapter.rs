@@ -6,9 +6,9 @@ use widestring::WideCString;
 use winapi::shared::winerror::{ERROR_SUCCESS, ERROR_BUFFER_OVERFLOW};
 use winapi::shared::ws2def::AF_UNSPEC;
 use socket2;
-use error::*;
+use crate::error::*;
 
-use bindings::*;
+use crate::bindings::*;
 
 /// Represent an operational status of the adapter
 /// See IP_ADAPTER_ADDRESSES docs for more details

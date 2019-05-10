@@ -22,10 +22,6 @@
 
 #[macro_use]
 extern crate error_chain;
-extern crate winapi;
-extern crate widestring;
-extern crate socket2;
-extern crate winreg;
 
 
 pub mod error;
@@ -33,4 +29,4 @@ pub mod computer;
 mod adapter;
 mod bindings;
 
-pub use adapter::{get_adapters, Adapter, OperStatus, IfType};
+pub use crate::adapter::{get_adapters, Adapter, OperStatus, IfType};

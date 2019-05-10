@@ -8,7 +8,7 @@ use winreg::enums::KEY_READ;
 use winapi::shared::minwindef::HKEY;
 use winreg::enums::HKEY_LOCAL_MACHINE;
 
-use error::*;
+use crate::error::*;
 
 
 /// Returns a value from the registry, and returns a default if it doesn't exist.
