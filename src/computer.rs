@@ -8,7 +8,7 @@ use winreg::enums::KEY_READ;
 use winreg::types::FromRegValue;
 use winreg::RegKey;
 
-use error::*;
+use crate::error::*;
 
 /// Returns a value from the registry, and returns a default if it doesn't exist.
 fn get_value<T: FromRegValue>(
@@ -44,7 +44,7 @@ pub fn get_search_list() -> Result<Vec<String>> {
     let params_key = hklm.open_subkey_with_flags(TCPIP_PARAMETERS_KEY_PATH, KEY_READ)?;
     let search_list: ::std::io::Result<String> = params_key.get_value("SearchList");
     if let Ok(search_list) = search_list {
-        let search_list: Vec<String> = search_list.split(',').map(|s| s.to_string()).collect();
+        let search_list: Vec<String> = search_list.split(',').map(std::string::ToString::to_string).collect();
         Ok(search_list)
     } else {
         Ok(vec![])

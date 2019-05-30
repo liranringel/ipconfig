@@ -1,4 +1,4 @@
-extern crate ipconfig;
+use ipconfig;
 
 #[test]
 fn no_error() {

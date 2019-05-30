@@ -1,21 +1,21 @@
 [package]
 name = "ipconfig"
-version = "0.1.9"  # Remember to also update the html_root_url in lib.rs and the documentation links here and in README.md
+version = "0.2.0"  # Remember to also update the html_root_url in lib.rs and the documentation links here and in README.md
 authors = ["Liran Ringel <liranringel@gmail.com>"]
 description = "Get network adapters information and network configuration for windows."
 license = "MIT/Apache-2.0"
 keywords = ["ipconfig", "network", "adapter", "interface", "windows"]
 repository = "https://github.com/liranringel/ipconfig"
 homepage = "https://github.com/liranringel/ipconfig"
-documentation = "https://docs.rs/ipconfig/0.1.9/x86_64-pc-windows-msvc/ipconfig/"
+documentation = "https://docs.rs/ipconfig/0.2/x86_64-pc-windows-msvc/ipconfig/"
 readme = "README.md"
+edition = "2018"
 
 [badges]
 appveyor = { repository = "liranringel/ipconfig" }
 
 [target.'cfg(windows)'.dependencies]
 winapi = "0.3"
-error-chain = "0.12"
-widestring = "0.4"
+widestring = "^0.4"
 socket2 = "0.3"
-winreg = "^0.6"
+winreg = "^0.6.0"

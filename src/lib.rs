@@ -18,15 +18,10 @@
 //! ```
 
 #![cfg(windows)]
-#![doc(html_root_url = "https://docs.rs/ipconfig/0.1.9/x86_64-pc-windows-msvc/ipconfig/")]
+#![doc(html_root_url = "https://docs.rs/ipconfig/0.2/x86_64-pc-windows-msvc/ipconfig/")]
 
-#[macro_use]
-extern crate error_chain;
-extern crate socket2;
 extern crate widestring;
 extern crate winapi;
-extern crate winreg;
-
 mod adapter;
 mod bindings;
 pub mod computer;

@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 #[cfg(target_pointer_width = "32")]
 #[path = "win32.rs"]
 #[allow(non_upper_case_globals)]

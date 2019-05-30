@@ -5,7 +5,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/tiwjo6q4eete0nmh/branch/master?svg=true)](https://ci.appveyor.com/project/liran-ringel/ipconfig/branch/master)
 [![Crates.io](https://img.shields.io/crates/v/ipconfig.svg)](https://crates.io/crates/ipconfig)
 
-[Documentation](https://docs.rs/ipconfig/0.1.9/x86_64-pc-windows-msvc/ipconfig/)
+[Documentation](https://docs.rs/ipconfig/0.2/x86_64-pc-windows-msvc/ipconfig/)
 
 ## Examples
 
