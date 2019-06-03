@@ -63,6 +63,7 @@ pub struct Adapter {
     transmit_link_speed: u64,
     oper_status: OperStatus,
     if_type: IfType,
+    ipv6_if_index: u32,
 }
 
 impl Adapter {
@@ -109,6 +110,14 @@ impl Adapter {
     /// Get the interface type
     pub fn if_type(&self) -> IfType {
         self.if_type
+    }
+
+    /// Get the IPv6 interface index.
+    ///
+    /// The return value can be used as an IPv6 scope id for link-local
+    /// addresses.
+    pub fn ipv6_if_index(&self) -> u32 {
+        self.ipv6_if_index
     }
 }
 
@@ -172,6 +181,7 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
         144 => IfType::Ieee1394,
         _ => IfType::Unsupported,
     };
+    let ipv6_if_index = adapter_addresses.Ipv6IfIndex;
 
     let description = WideCString::from_ptr_str(adapter_addresses.Description).to_string()?;
     let friendly_name = WideCString::from_ptr_str(adapter_addresses.FriendlyName).to_string()?;
@@ -191,6 +201,7 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
         transmit_link_speed,
         oper_status,
         if_type,
+        ipv6_if_index,
     })
 }
 
