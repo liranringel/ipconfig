@@ -7,7 +7,7 @@ use std::net::IpAddr;
 use crate::error::*;
 use socket2;
 use widestring::WideCString;
-use winapi::shared::winerror::ERROR_SUCCESS;
+use winapi::shared::winerror::{ERROR_SUCCESS, ERROR_BUFFER_OVERFLOW};
 use winapi::shared::ws2def::AF_UNSPEC;
 use winapi::shared::ws2def::SOCKADDR;
 
@@ -68,6 +68,7 @@ pub struct Adapter {
     transmit_link_speed: u64,
     oper_status: OperStatus,
     if_type: IfType,
+    ipv6_if_index: u32,
 }
 
 impl Adapter {
@@ -123,26 +124,36 @@ impl Adapter {
     pub fn if_type(&self) -> IfType {
         self.if_type
     }
+
+    /// Get the IPv6 interface index.
+    ///
+    /// The return value can be used as an IPv6 scope id for link-local
+    /// addresses.
+    pub fn ipv6_if_index(&self) -> u32 {
+        self.ipv6_if_index
+    }
 }
 
 /// Get all the network adapters on this machine.
 pub fn get_adapters() -> Result<Vec<Adapter>> {
     unsafe {
-        // Preallocate 32K per Microsoft recommendation, see Remarks section
+        // Preallocate 16K per Microsoft recommendation, see Remarks section
         // https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getadaptersaddresses
-        let mut buf_len: ULONG = 32768;
+        let mut buf_len: ULONG = 16384;
+        let mut adapters_addresses_buffer = Vec::new();
+;
+        let mut result = ERROR_BUFFER_OVERFLOW;
+        while result == ERROR_BUFFER_OVERFLOW {
+            adapters_addresses_buffer.resize(buf_len as usize, 0);
 
-        let mut adapters_addresses_buffer: Vec<u8> = vec![0; buf_len as usize];
-        #[allow(clippy::cast_ptr_alignment)]
-        let mut adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES =
-            adapters_addresses_buffer.as_mut_ptr() as *mut _;
-        let result = GetAdaptersAddresses(
-            AF_UNSPEC as u32,
-            0x0080 | 0x0010, //GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_INCLUDE_PREFIX,
-            std::ptr::null_mut(),
-            adapter_addresses_ptr,
-            &mut buf_len as *mut ULONG,
-        );
+            result = GetAdaptersAddresses(
+                AF_UNSPEC as u32,
+                0x0080 | 0x0010, //GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_INCLUDE_PREFIX,
+                std::ptr::null_mut(),
+                adapters_addresses_buffer.as_mut_ptr() as PIP_ADAPTER_ADDRESSES,
+                &mut buf_len as *mut ULONG,
+            );
+        }
 
         if result != ERROR_SUCCESS {
             return Err(Error {
@@ -151,6 +162,9 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         }
 
         let mut adapters = vec![];
+        #[allow(clippy::cast_ptr_alignment)]
+        let mut adapter_addresses_ptr = adapters_addresses_buffer.as_mut_ptr() as PIP_ADAPTER_ADDRESSES;
+
         while !adapter_addresses_ptr.is_null() {
             adapters.push(get_adapter(adapter_addresses_ptr)?);
             adapter_addresses_ptr = (*adapter_addresses_ptr).Next;
@@ -195,6 +209,7 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
         144 => IfType::Ieee1394,
         _ => IfType::Unsupported,
     };
+    let ipv6_if_index = adapter_addresses.Ipv6IfIndex;
 
     let description = WideCString::from_ptr_str(adapter_addresses.Description).to_string()?;
     let friendly_name = WideCString::from_ptr_str(adapter_addresses.FriendlyName).to_string()?;
@@ -219,6 +234,7 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
         transmit_link_speed,
         oper_status,
         if_type,
+        ipv6_if_index,
     })
 }
 
