@@ -141,7 +141,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         // https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getadaptersaddresses
         let mut buf_len: ULONG = 16384;
         let mut adapters_addresses_buffer = Vec::new();
-;
+
         let mut result = ERROR_BUFFER_OVERFLOW;
         while result == ERROR_BUFFER_OVERFLOW {
             adapters_addresses_buffer.resize(buf_len as usize, 0);
