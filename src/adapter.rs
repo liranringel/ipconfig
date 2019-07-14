@@ -164,7 +164,6 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         }
 
         let mut adapters = vec![];
-        #[allow(clippy::cast_ptr_alignment)]
         let mut adapter_addresses_ptr = adapters_addresses_buffer.as_mut_ptr() as PIP_ADAPTER_ADDRESSES;
 
         while !adapter_addresses_ptr.is_null() {
