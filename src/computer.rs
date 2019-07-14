@@ -73,7 +73,7 @@ pub fn is_round_robin_enabled() -> Result<bool> {
         HKEY_LOCAL_MACHINE,
         "SYSTEM\\CurrentControlSet\\Services\\DNS\\Parameters",
         "RoundRobin",
-        1,
-    )?; // The default is 1 according to msdn
+        1, // The default is 1 according to msdn
+    )?;
     Ok(rotate != 0)
 }

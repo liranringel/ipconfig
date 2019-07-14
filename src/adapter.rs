@@ -80,12 +80,14 @@ impl Adapter {
     pub fn ip_addresses(&self) -> &[IpAddr] {
         &self.ip_addresses
     }
-    /// Get the adapter's prefixes
-    pub fn prefixes(&self) -> &Vec<(IpAddr, u32)> {
+    /// Get the adapter's prefixes. Returns a list of tuples (IpAddr, u32),
+    /// where first element is a subnet address, e.g. 192.168.1.0
+    /// and second element is prefix length, e.g. 24
+    pub fn prefixes(&self) -> &[(IpAddr, u32)] {
         &self.prefixes
     }
     /// Get the adapter's gateways
-    pub fn gateways(&self) -> &Vec<IpAddr> {
+    pub fn gateways(&self) -> &[IpAddr] {
         &self.gateways
     }
     /// Get the adapter's dns servers (the preferred dns server is first)
