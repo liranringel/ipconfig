@@ -20,10 +20,11 @@
 #![cfg(windows)]
 #![doc(html_root_url = "https://docs.rs/ipconfig/0.2/x86_64-pc-windows-msvc/ipconfig/")]
 
-
-pub mod error;
-pub mod computer;
+extern crate widestring;
+extern crate winapi;
 mod adapter;
 mod bindings;
+pub mod computer;
+pub mod error;
 
-pub use crate::adapter::{get_adapters, Adapter, OperStatus, IfType};
+pub use adapter::{get_adapters, Adapter, IfType, OperStatus};
