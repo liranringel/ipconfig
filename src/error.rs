@@ -25,11 +25,7 @@ impl std::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {
-    fn description(&self) -> &str {
-        "ipconfig error"
-    }
-
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match &self.kind {
             ErrorKind::Utf8(err) => Some(err),
             ErrorKind::FromUtf16(err) => Some(err),
