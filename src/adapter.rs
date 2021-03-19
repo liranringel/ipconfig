@@ -240,16 +240,20 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
 }
 
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
-    let sockaddr = socket2::SockAddr::from_raw_parts(
-        socket_address.lpSockaddr as *const SOCKADDR,
-        socket_address.iSockaddrLength,
-    );
+    let (_, sockaddr) = socket2::SockAddr::init(|storage, length| {
+        debug_assert!(
+            std::mem::size_of_val(unsafe { &*socket_address.lpSockaddr })
+                <= std::mem::size_of_val(unsafe { &*storage })
+        );
+        unsafe {
+            storage.copy_from_nonoverlapping(socket_address.lpSockaddr as *const _, 1);
+            *length = socket_address.iSockaddrLength;
+        }
+        Ok(())
+    })
+    .unwrap();
 
-    // Could be either ipv4 or ipv6
-    sockaddr
-        .as_inet()
-        .map(|s| IpAddr::V4(*s.ip()))
-        .unwrap_or_else(|| IpAddr::V6(*sockaddr.as_inet6().unwrap().ip()))
+    sockaddr.as_socket().map(|s| s.ip()).unwrap()
 }
 
 unsafe fn get_dns_servers(
