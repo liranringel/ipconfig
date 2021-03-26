@@ -242,13 +242,10 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
     let (_, sockaddr) = socket2::SockAddr::init(|storage, length| {
         debug_assert!(
-            std::mem::size_of_val(unsafe { &*socket_address.lpSockaddr })
-                <= std::mem::size_of_val(unsafe { &*storage })
+            std::mem::size_of_val(&*socket_address.lpSockaddr) <= std::mem::size_of_val(&*storage)
         );
-        unsafe {
-            storage.copy_from_nonoverlapping(socket_address.lpSockaddr as *const _, 1);
-            *length = socket_address.iSockaddrLength;
-        }
+        storage.copy_from_nonoverlapping(socket_address.lpSockaddr as *const _, 1);
+        *length = socket_address.iSockaddrLength;
         Ok(())
     })
     .unwrap();
