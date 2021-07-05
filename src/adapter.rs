@@ -1,18 +1,18 @@
 #![allow(clippy::cast_ptr_alignment)]
 
 use std;
+use std::convert::TryFrom;
 use std::ffi::CStr;
 use std::net::IpAddr;
 
 use crate::error::*;
 use socket2;
 use widestring::WideCString;
-use winapi::shared::winerror::{ERROR_SUCCESS, ERROR_BUFFER_OVERFLOW};
+use winapi::shared::winerror::{ERROR_BUFFER_OVERFLOW, ERROR_SUCCESS};
 use winapi::shared::ws2def::AF_UNSPEC;
 use winapi::shared::ws2def::SOCKADDR;
 
 use crate::bindings::*;
-use std::convert::TryFrom;
 
 /// Represent an operational status of the adapter
 /// See IP_ADAPTER_ADDRESSES docs for more details
