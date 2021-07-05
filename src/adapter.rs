@@ -12,6 +12,7 @@ use winapi::shared::ws2def::AF_UNSPEC;
 use winapi::shared::ws2def::SOCKADDR;
 
 use crate::bindings::*;
+use std::convert::TryFrom;
 
 /// Represent an operational status of the adapter
 /// See IP_ADAPTER_ADDRESSES docs for more details
@@ -241,10 +242,11 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
 
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
     let (_, sockaddr) = socket2::SockAddr::init(|storage, length| {
-        assert!(socket_address.iSockaddrLength <= std::mem::size_of_val(&*storage));
+        let sockaddr_length = usize::try_from(socket_address.iSockaddrLength).unwrap();
+        assert!(sockaddr_length <= std::mem::size_of_val(&*storage));
         let dst: *mut u8 = storage.cast();
         let src: *const u8 = socket_address.lpSockaddr.cast();
-        dst.copy_from_nonoverlapping(src, socket_address.iSockaddrLength);
+        dst.copy_from_nonoverlapping(src, sockaddr_length);
         *length = socket_address.iSockaddrLength;
         Ok(())
     })
