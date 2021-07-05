@@ -1,13 +1,14 @@
 #![allow(clippy::cast_ptr_alignment)]
 
 use std;
+use std::convert::TryFrom;
 use std::ffi::CStr;
 use std::net::IpAddr;
 
 use crate::error::*;
 use socket2;
 use widestring::WideCString;
-use winapi::shared::winerror::{ERROR_SUCCESS, ERROR_BUFFER_OVERFLOW};
+use winapi::shared::winerror::{ERROR_BUFFER_OVERFLOW, ERROR_SUCCESS};
 use winapi::shared::ws2def::AF_UNSPEC;
 use winapi::shared::ws2def::SOCKADDR;
 
@@ -240,16 +241,18 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
 }
 
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
-    let sockaddr = socket2::SockAddr::from_raw_parts(
-        socket_address.lpSockaddr as *const SOCKADDR,
-        socket_address.iSockaddrLength,
-    );
+    let (_, sockaddr) = socket2::SockAddr::init(|storage, length| {
+        let sockaddr_length = usize::try_from(socket_address.iSockaddrLength).unwrap();
+        assert!(sockaddr_length <= std::mem::size_of_val(&*storage));
+        let dst: *mut u8 = storage.cast();
+        let src: *const u8 = socket_address.lpSockaddr.cast();
+        dst.copy_from_nonoverlapping(src, sockaddr_length);
+        *length = socket_address.iSockaddrLength;
+        Ok(())
+    })
+    .unwrap();
 
-    // Could be either ipv4 or ipv6
-    sockaddr
-        .as_inet()
-        .map(|s| IpAddr::V4(*s.ip()))
-        .unwrap_or_else(|| IpAddr::V6(*sockaddr.as_inet6().unwrap().ip()))
+    sockaddr.as_socket().map(|s| s.ip()).unwrap()
 }
 
 unsafe fn get_dns_servers(
