@@ -70,6 +70,8 @@ pub struct Adapter {
     oper_status: OperStatus,
     if_type: IfType,
     ipv6_if_index: u32,
+    ipv4_metric: u32,
+    ipv6_metric: u32,
 }
 
 impl Adapter {
@@ -135,6 +137,15 @@ impl Adapter {
     pub fn ipv6_if_index(&self) -> u32 {
         self.ipv6_if_index
     }
+
+    /// Returns the metric used to compute route preference for IPv4
+    pub fn ipv4_metric(&self) -> u32 {
+        self.ipv4_metric
+    }
+    /// Returns the metric used to compute route preference for IPv6
+    pub fn ipv6_metric(&self) -> u32 {
+        self.ipv6_metric
+    }
 }
 
 /// Get all the network adapters on this machine.
@@ -165,7 +176,8 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
         }
 
         let mut adapters = vec![];
-        let mut adapter_addresses_ptr = adapters_addresses_buffer.as_mut_ptr() as PIP_ADAPTER_ADDRESSES;
+        let mut adapter_addresses_ptr =
+            adapters_addresses_buffer.as_mut_ptr() as PIP_ADAPTER_ADDRESSES;
 
         while !adapter_addresses_ptr.is_null() {
             adapters.push(get_adapter(adapter_addresses_ptr)?);
@@ -187,6 +199,8 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
     let unicast_addresses = get_unicast_addresses(adapter_addresses.FirstUnicastAddress)?;
     let receive_link_speed: u64 = adapter_addresses.ReceiveLinkSpeed;
     let transmit_link_speed: u64 = adapter_addresses.TransmitLinkSpeed;
+    let ipv4_metric = adapter_addresses.Ipv4Metric;
+    let ipv6_metric = adapter_addresses.Ipv6Metric;
     let oper_status = match adapter_addresses.OperStatus {
         1 => OperStatus::IfOperStatusUp,
         2 => OperStatus::IfOperStatusDown,
@@ -237,6 +251,8 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
         oper_status,
         if_type,
         ipv6_if_index,
+        ipv4_metric,
+        ipv6_metric,
     })
 }
 
