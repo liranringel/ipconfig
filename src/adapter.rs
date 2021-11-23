@@ -10,7 +10,6 @@ use socket2;
 use widestring::WideCString;
 use winapi::shared::winerror::{ERROR_BUFFER_OVERFLOW, ERROR_SUCCESS};
 use winapi::shared::ws2def::AF_UNSPEC;
-use winapi::shared::ws2def::SOCKADDR;
 
 use crate::bindings::*;
 
@@ -29,7 +28,7 @@ pub enum OperStatus {
 
 /// Represent an interface type
 /// See IANA docs on iftype for more details
-/// https://www.iana.org/assignments/ianaiftype-mib/ianaiftype-mib
+/// <https://www.iana.org/assignments/ianaiftype-mib/ianaiftype-mib>
 /// Note that we only support a subset of the IANA interface
 /// types and in case the adapter has an unsupported type,
 /// `IfType::Unsupported` is used. `IfType::Other`
