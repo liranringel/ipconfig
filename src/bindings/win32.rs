@@ -3,6 +3,7 @@
     bindgen.exe --whitelist-function=GetAdaptersAddresses wrapper.h -- --target=i686-pc-windows-msvc
 */
 
+#![allow(warnings)]
 pub type wchar_t = ::std::os::raw::c_ushort;
 pub type ULONG = ::std::os::raw::c_ulong;
 pub type PULONG = *mut ULONG;
