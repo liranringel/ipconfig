@@ -24,6 +24,8 @@ extern crate widestring;
 extern crate winapi;
 mod adapter;
 mod bindings;
+
+#[cfg(feature = "computer")]
 pub mod computer;
 pub mod error;
 

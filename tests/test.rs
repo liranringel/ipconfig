@@ -1,8 +1,13 @@
 use ipconfig;
 
 #[test]
-fn no_error() {
+fn no_error_adapters() {
     println!("Adapters: {:#?}", ipconfig::get_adapters().unwrap());
+}
+
+#[cfg(feature = "computer")]
+#[test]
+fn no_error_computer() {
     println!(
         "Search list: {:#?}",
         ipconfig::computer::get_search_list().unwrap()

@@ -14,8 +14,12 @@ edition = "2018"
 [badges]
 appveyor = { repository = "liranringel/ipconfig" }
 
+[features]
+default = ["computer"]
+computer = ["winreg"]
+
 [target.'cfg(windows)'.dependencies]
 winapi = "^0.3.4"
 widestring = "^0.5"
 socket2 = "^0.4.0"
-winreg = "^0.7.0"
+winreg = { version = "^0.7.0", optional = true }
