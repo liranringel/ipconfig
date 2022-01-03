@@ -2579,8 +2579,7 @@ impl Clone for _IP_ADAPTER_ADDRESSES_LH {
 }
 pub type IP_ADAPTER_ADDRESSES_LH = _IP_ADAPTER_ADDRESSES_LH;
 pub type PIP_ADAPTER_ADDRESSES = *mut IP_ADAPTER_ADDRESSES_LH;
-extern "stdcall" {
-    #[link_name = "\u{1}_GetAdaptersAddresses@20"]
+extern "system" {
     pub fn GetAdaptersAddresses(
         Family: ULONG,
         Flags: ULONG,
