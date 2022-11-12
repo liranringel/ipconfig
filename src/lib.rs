@@ -18,7 +18,7 @@
 //! ```
 
 #![cfg(windows)]
-#![doc(html_root_url = "https://docs.rs/ipconfig/0.3/x86_64-pc-windows-msvc/ipconfig/")]
+#![doc(html_root_url = "https://docs.rs/ipconfig/0.3.1/x86_64-pc-windows-msvc/ipconfig/")]
 
 extern crate widestring;
 extern crate winapi;
