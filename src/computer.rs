@@ -2,9 +2,9 @@
 
 use std::string::String;
 
-use winapi::shared::minwindef::HKEY;
-use winreg::enums::HKEY_LOCAL_MACHINE;
-use winreg::enums::KEY_READ;
+use windows_sys::Win32::System::Registry::HKEY;
+use windows_sys::Win32::System::Registry::HKEY_LOCAL_MACHINE;
+use windows_sys::Win32::System::Registry::KEY_READ;
 use winreg::types::FromRegValue;
 use winreg::RegKey;
 
@@ -44,7 +44,10 @@ pub fn get_search_list() -> Result<Vec<String>> {
     let params_key = hklm.open_subkey_with_flags(TCPIP_PARAMETERS_KEY_PATH, KEY_READ)?;
     let search_list: ::std::io::Result<String> = params_key.get_value("SearchList");
     if let Ok(search_list) = search_list {
-        let search_list: Vec<String> = search_list.split(',').map(std::string::ToString::to_string).collect();
+        let search_list: Vec<String> = search_list
+            .split(',')
+            .map(std::string::ToString::to_string)
+            .collect();
         Ok(search_list)
     } else {
         Ok(vec![])

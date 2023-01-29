@@ -21,7 +21,7 @@
 #![doc(html_root_url = "https://docs.rs/ipconfig/0.3.1/x86_64-pc-windows-msvc/ipconfig/")]
 
 extern crate widestring;
-extern crate winapi;
+extern crate windows_sys;
 mod adapter;
 mod bindings;
 

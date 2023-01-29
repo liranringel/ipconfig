@@ -8,8 +8,9 @@ use std::net::IpAddr;
 use crate::error::*;
 use socket2;
 use widestring::WideCString;
-use winapi::shared::winerror::{ERROR_BUFFER_OVERFLOW, ERROR_SUCCESS};
-use winapi::shared::ws2def::AF_UNSPEC;
+use windows_sys::Win32::Foundation::ERROR_BUFFER_OVERFLOW;
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+use windows_sys::Win32::Networking::WinSock::AF_UNSPEC;
 
 use crate::bindings::*;
 
