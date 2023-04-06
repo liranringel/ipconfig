@@ -3,8 +3,8 @@
 use std::string::String;
 
 use windows_sys::Win32::System::Registry::HKEY;
-use windows_sys::Win32::System::Registry::HKEY_LOCAL_MACHINE;
-use windows_sys::Win32::System::Registry::KEY_READ;
+use winreg::enums::HKEY_LOCAL_MACHINE;
+use winreg::enums::KEY_READ;
 use winreg::types::FromRegValue;
 use winreg::RegKey;
 
