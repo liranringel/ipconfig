@@ -8,7 +8,7 @@ pub struct Error {
 #[derive(Debug)]
 pub(crate) enum ErrorKind {
     Utf8(std::str::Utf8Error),
-    FromUtf16(::std::string::FromUtf16Error),
+    FromUtf16(widestring::error::Utf16Error),
     Io(::std::io::Error),
     Os(u32),
 }
@@ -37,21 +37,26 @@ impl std::error::Error for Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-
 impl From<std::str::Utf8Error> for Error {
     fn from(err: std::str::Utf8Error) -> Self {
-        Error {kind: ErrorKind::Utf8(err)}
+        Error {
+            kind: ErrorKind::Utf8(err),
+        }
     }
 }
 
-impl From<std::string::FromUtf16Error> for Error {
-    fn from(err: std::string::FromUtf16Error) -> Self {
-        Error {kind: ErrorKind::FromUtf16(err)}
+impl From<widestring::error::Utf16Error> for Error {
+    fn from(err: widestring::error::Utf16Error) -> Self {
+        Error {
+            kind: ErrorKind::FromUtf16(err),
+        }
     }
 }
 
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Self {
-        Error {kind: ErrorKind::Io(err)}
+        Error {
+            kind: ErrorKind::Io(err),
+        }
     }
 }

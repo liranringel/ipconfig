@@ -8,8 +8,9 @@ use std::net::IpAddr;
 use crate::error::*;
 use socket2;
 use widestring::WideCString;
-use winapi::shared::winerror::{ERROR_BUFFER_OVERFLOW, ERROR_SUCCESS};
-use winapi::shared::ws2def::AF_UNSPEC;
+use windows_sys::Win32::Foundation::ERROR_BUFFER_OVERFLOW;
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+use windows_sys::Win32::Networking::WinSock::AF_UNSPEC;
 
 use crate::bindings::*;
 
@@ -256,7 +257,7 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
 }
 
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
-    let (_, sockaddr) = socket2::SockAddr::init(|storage, length| {
+    let (_, sockaddr) = socket2::SockAddr::try_init(|storage, length| {
         let sockaddr_length = usize::try_from(socket_address.iSockaddrLength).unwrap();
         assert!(sockaddr_length <= std::mem::size_of_val(&*storage));
         let dst: *mut u8 = storage.cast();
