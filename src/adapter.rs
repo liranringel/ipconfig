@@ -181,7 +181,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
 
         while !adapter_addresses_ptr.is_null() {
             adapters.push(get_adapter(adapter_addresses_ptr)?);
-            adapter_addresses_ptr = (*adapter_addresses_ptr).Next;
+            adapter_addresses_ptr = adapter_addresses_ptr.read_unaligned().Next;
         }
 
         Ok(adapters)
@@ -189,7 +189,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
 }
 
 unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Adapter> {
-    let adapter_addresses = &*adapter_addresses_ptr;
+    let adapter_addresses = adapter_addresses_ptr.read_unaligned();
     let adapter_name = CStr::from_ptr(adapter_addresses.AdapterName)
         .to_str()?
         .to_owned();
@@ -259,11 +259,11 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
 unsafe fn socket_address_to_ipaddr(socket_address: &SOCKET_ADDRESS) -> IpAddr {
     let (_, sockaddr) = socket2::SockAddr::try_init(|storage, length| {
         let sockaddr_length = usize::try_from(socket_address.iSockaddrLength).unwrap();
-        assert!(sockaddr_length <= std::mem::size_of_val(&*storage));
+        assert!(sockaddr_length <= std::mem::size_of_val(&storage.read_unaligned()));
         let dst: *mut u8 = storage.cast();
         let src: *const u8 = socket_address.lpSockaddr.cast();
         dst.copy_from_nonoverlapping(src, sockaddr_length);
-        *length = socket_address.iSockaddrLength;
+        std::ptr::write_unaligned(length, socket_address.iSockaddrLength);
         Ok(())
     })
     .unwrap();
@@ -277,7 +277,7 @@ unsafe fn get_dns_servers(
     let mut dns_servers = vec![];
 
     while !dns_server_ptr.is_null() {
-        let dns_server = &*dns_server_ptr;
+        let dns_server = dns_server_ptr.read_unaligned();
         let ipaddr = socket_address_to_ipaddr(&dns_server.Address);
         dns_servers.push(ipaddr);
 
@@ -291,7 +291,7 @@ unsafe fn get_gateways(mut gateway_ptr: PIP_ADAPTER_GATEWAY_ADDRESS_LH) -> Resul
     let mut gateways = vec![];
 
     while !gateway_ptr.is_null() {
-        let gateway = &*gateway_ptr;
+        let gateway = gateway_ptr.read_unaligned();
         let ipaddr = socket_address_to_ipaddr(&gateway.Address);
         gateways.push(ipaddr);
 
@@ -307,7 +307,7 @@ unsafe fn get_unicast_addresses(
     let mut unicast_addresses = vec![];
 
     while !unicast_addresses_ptr.is_null() {
-        let unicast_address = &*unicast_addresses_ptr;
+        let unicast_address = unicast_addresses_ptr.read_unaligned();
         let ipaddr = socket_address_to_ipaddr(&unicast_address.Address);
         unicast_addresses.push(ipaddr);
 
@@ -321,7 +321,7 @@ unsafe fn get_prefixes(mut prefixes_ptr: PIP_ADAPTER_PREFIX_XP) -> Result<Vec<(I
     let mut prefixes = vec![];
 
     while !prefixes_ptr.is_null() {
-        let prefix = &*prefixes_ptr;
+        let prefix = prefixes_ptr.read_unaligned();
         let ipaddr = socket_address_to_ipaddr(&prefix.Address);
         prefixes.push((ipaddr, prefix.PrefixLength));
 

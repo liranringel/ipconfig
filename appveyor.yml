@@ -18,6 +18,8 @@ install:
 build: false
 
 test_script:
+  - set CURL_SSL_BACKEND=openssl
+  - set CARGO_HTTP_CHECK_REVOKE=false
   - cargo build --verbose
   - cargo test --verbose -- --nocapture
   - cargo doc
