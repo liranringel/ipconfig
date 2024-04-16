@@ -58,6 +58,7 @@ pub enum IfType {
 #[derive(Debug)]
 pub struct Adapter {
     adapter_name: String,
+    ipv4_if_index: u32,
     ip_addresses: Vec<IpAddr>,
     prefixes: Vec<(IpAddr, u32)>,
     gateways: Vec<IpAddr>,
@@ -78,6 +79,10 @@ impl Adapter {
     /// Get the adapter's name
     pub fn adapter_name(&self) -> &str {
         &self.adapter_name
+    }
+    /// Get the ipv4 interface index
+    pub fn ipv4_if_index(&self) -> u32 {
+        self.ipv4_if_index
     }
     /// Get the adapter's ip addresses (unicast ip addresses)
     pub fn ip_addresses(&self) -> &[IpAddr] {
@@ -190,6 +195,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
 
 unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Adapter> {
     let adapter_addresses = adapter_addresses_ptr.read_unaligned();
+    let ipv4_if_index = adapter_addresses.__bindgen_anon_1.__bindgen_anon_1.IfIndex;
     let adapter_name = CStr::from_ptr(adapter_addresses.AdapterName)
         .to_str()?
         .to_owned();
@@ -239,6 +245,7 @@ unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Ad
     };
     Ok(Adapter {
         adapter_name,
+        ipv4_if_index,
         ip_addresses: unicast_addresses,
         prefixes,
         gateways,
