@@ -193,6 +193,7 @@ pub fn get_adapters() -> Result<Vec<Adapter>> {
     }
 }
 
+// ref: https://learn.microsoft.com/en-us/windows/win32/api/iptypes/ns-iptypes-ip_adapter_addresses_lh
 unsafe fn get_adapter(adapter_addresses_ptr: PIP_ADAPTER_ADDRESSES) -> Result<Adapter> {
     let adapter_addresses = adapter_addresses_ptr.read_unaligned();
     let ipv4_if_index = adapter_addresses.__bindgen_anon_1.__bindgen_anon_1.IfIndex;
