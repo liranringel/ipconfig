@@ -1,13 +1,13 @@
 [package]
 name = "ipconfig"
-version = "0.3.2"  # Remember to also update the html_root_url in lib.rs and the documentation links here and in README.md
+version = "0.3.3"  # Remember to also update the html_root_url in lib.rs and the documentation links here and in README.md
 authors = ["Liran Ringel <liranringel@gmail.com>"]
 description = "Get network adapters information and network configuration for windows."
 license = "MIT/Apache-2.0"
 keywords = ["ipconfig", "network", "adapter", "interface", "windows"]
 repository = "https://github.com/liranringel/ipconfig"
 homepage = "https://github.com/liranringel/ipconfig"
-documentation = "https://docs.rs/ipconfig/0.3.2/x86_64-pc-windows-msvc/ipconfig/"
+documentation = "https://docs.rs/ipconfig/0.3.3/x86_64-pc-windows-msvc/ipconfig/"
 readme = "README.md"
 edition = "2018"
 
