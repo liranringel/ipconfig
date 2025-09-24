@@ -15,7 +15,7 @@ install:
   - rustc -V
   - cargo -V
 
-build: false
+build: off
 
 test_script:
   - set CURL_SSL_BACKEND=openssl
