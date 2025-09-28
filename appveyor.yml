@@ -1,4 +1,6 @@
 environment:
+  CURL_SSL_BACKEND: openssl
+  CARGO_HTTP_CHECK_REVOKE: false
   matrix:
   - TARGET: x86_64-pc-windows-msvc
   - TARGET: i686-pc-windows-msvc
@@ -15,11 +17,9 @@ install:
   - rustc -V
   - cargo -V
 
-build: false
+build_script:
+  - cargo build --verbose
 
 test_script:
-  - set CURL_SSL_BACKEND=openssl
-  - set CARGO_HTTP_CHECK_REVOKE=false
-  - cargo build --verbose
   - cargo test --verbose -- --nocapture
   - cargo doc
