@@ -4,6 +4,7 @@
 */
 
 #![allow(warnings)]
+#![cfg_attr(test, allow(deref_nullptr))]
 pub type wchar_t = ::std::os::raw::c_ushort;
 pub type ULONG = ::std::os::raw::c_ulong;
 pub type PULONG = *mut ULONG;
