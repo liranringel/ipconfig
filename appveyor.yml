@@ -4,8 +4,10 @@ environment:
   matrix:
   - TARGET: x86_64-pc-windows-msvc
   - TARGET: i686-pc-windows-msvc
-  - TARGET: x86_64-pc-windows-gnu
-  - TARGET: i686-pc-windows-gnu
+  # Fails with "dlltool.exe not found"
+  # Probably needs some sort of msys2 setup
+  #- TARGET: x86_64-pc-windows-gnu
+  #- TARGET: i686-pc-windows-gnu
 install:
   # Install Rust
   - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
