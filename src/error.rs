@@ -9,6 +9,8 @@ pub struct Error {
 pub(crate) enum ErrorKind {
     Utf8(std::str::Utf8Error),
     FromUtf16(widestring::error::Utf16Error),
+    #[cfg(feature = "computer")]
+    HResult(windows_result::Error),
     Io(::std::io::Error),
     Os(u32),
 }
@@ -18,6 +20,8 @@ impl std::fmt::Display for Error {
         match &self.kind {
             ErrorKind::Utf8(err) => write!(f, "Utf8 error: {}", err),
             ErrorKind::FromUtf16(err) => write!(f, "FromUtf16 error: {}", err),
+            #[cfg(feature = "computer")]
+            ErrorKind::HResult(err) => write!(f, "HRESULT error: {}", err),
             ErrorKind::Io(err) => write!(f, "IO error: {}", err),
             ErrorKind::Os(err) => write!(f, "OS error: {}", err),
         }
@@ -29,6 +33,8 @@ impl std::error::Error for Error {
         match &self.kind {
             ErrorKind::Utf8(err) => Some(err),
             ErrorKind::FromUtf16(err) => Some(err),
+            #[cfg(feature = "computer")]
+            ErrorKind::HResult(err) => Some(err),
             ErrorKind::Io(err) => Some(err),
             ErrorKind::Os(_) => None,
         }
@@ -36,6 +42,15 @@ impl std::error::Error for Error {
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+#[cfg(feature = "computer")]
+impl From<windows_result::Error> for Error {
+    fn from(err: windows_result::Error) -> Self {
+        Error {
+            kind: ErrorKind::HResult(err),
+        }
+    }
+}
 
 impl From<std::str::Utf8Error> for Error {
     fn from(err: std::str::Utf8Error) -> Self {
