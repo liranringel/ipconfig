@@ -22,6 +22,6 @@ computer = ["dep:windows-registry", "dep:windows-result"]
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Networking_WinSock", "Win32_System_Registry"] }
 widestring = "1.0.2"
-socket2 = "0.6.0"
+socket2 = "0.6.4"
 windows-registry = { version = "0.6.1", optional = true }
 windows-result = { version = "0.4.1", optional = true }
